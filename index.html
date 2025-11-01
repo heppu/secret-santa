@@ -227,6 +227,143 @@
             margin-top: 20px;
         }
 
+        /* Link Generator Styles */
+        .generator-container {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .generator-container h2 {
+            color: #c41e3a;
+            font-size: 2em;
+            margin-bottom: 20px;
+        }
+
+        .generator-container p {
+            color: #333;
+            margin-bottom: 20px;
+            font-size: 1.1em;
+        }
+
+        .input-section {
+            margin-bottom: 30px;
+        }
+
+        .input-section label {
+            display: block;
+            color: #333;
+            font-size: 1.2em;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .input-section textarea {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #c41e3a;
+            border-radius: 10px;
+            font-size: 1.1em;
+            font-family: 'Georgia', serif;
+            resize: vertical;
+            min-height: 200px;
+        }
+
+        .generate-btn {
+            background: linear-gradient(135deg, #c41e3a 0%, #8b0000 100%);
+            color: white;
+            padding: 15px 40px;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.3em;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 5px 20px rgba(196, 30, 58, 0.4);
+            transition: all 0.3s ease;
+            font-family: 'Georgia', serif;
+        }
+
+        .generate-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 30px rgba(196, 30, 58, 0.6);
+        }
+
+        .generate-btn:active {
+            transform: translateY(0);
+        }
+
+        .links-container {
+            margin-top: 30px;
+            display: none;
+        }
+
+        .links-container.show {
+            display: block;
+        }
+
+        .links-container h3 {
+            color: #c41e3a;
+            font-size: 1.5em;
+            margin-bottom: 20px;
+        }
+
+        .link-item {
+            background: #f8f9fa;
+            padding: 15px;
+            margin-bottom: 15px;
+            border-radius: 10px;
+            border: 2px solid #c41e3a;
+        }
+
+        .link-item-name {
+            font-weight: bold;
+            color: #333;
+            font-size: 1.2em;
+            margin-bottom: 10px;
+        }
+
+        .link-item-url {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .link-input {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 0.9em;
+            background: white;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .copy-btn {
+            background: #FFD700;
+            color: #333;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            white-space: nowrap;
+        }
+
+        .copy-btn:hover {
+            background: #ffc107;
+            transform: scale(1.05);
+        }
+
+        .copy-btn.copied {
+            background: #28a745;
+            color: white;
+        }
+
         @media (max-width: 768px) {
             .title {
                 font-size: 2.5em;
@@ -239,6 +376,15 @@
                 width: 150px;
                 height: 150px;
             }
+            .generator-container {
+                padding: 20px;
+            }
+            .link-item-url {
+                flex-direction: column;
+            }
+            .link-input {
+                width: 100%;
+            }
         }
     </style>
 </head>
@@ -246,19 +392,39 @@
     <div class="container">
         <h1 class="title">🎄 Secret Santa 🎅</h1>
         
-        <div id="giftBox" class="gift-box">
-            <div class="gift">
-                <div class="bow">
-                    <div class="bow-center"></div>
+        <!-- Gift reveal section (shown when ?name parameter exists) -->
+        <div id="revealSection" style="display: none;">
+            <div id="giftBox" class="gift-box">
+                <div class="gift">
+                    <div class="bow">
+                        <div class="bow-center"></div>
+                    </div>
                 </div>
+            </div>
+
+            <p class="subtitle">Click the gift to reveal your Secret Santa! 🎁</p>
+
+            <div id="revealContainer" class="reveal-container">
+                <div class="santa-name" id="santaName"></div>
+                <p class="message">🎉 Time to get shopping! 🎉</p>
             </div>
         </div>
 
-        <p class="subtitle">Click the gift to reveal your Secret Santa! 🎁</p>
-
-        <div id="revealContainer" class="reveal-container">
-            <div class="santa-name" id="santaName"></div>
-            <p class="message">🎉 Time to get shopping! 🎉</p>
+        <!-- Link generator section (shown when no ?name parameter) -->
+        <div id="generatorSection" style="display: none;">
+            <div class="generator-container">
+                <h2>🎁 Generate Secret Santa Links</h2>
+                <p>Enter the names of all participants (one per line) to generate personalized Secret Santa links!</p>
+                
+                <div class="input-section">
+                    <label for="namesInput">Participant Names:</label>
+                    <textarea id="namesInput" placeholder="John Doe&#10;Jane Smith&#10;Bob Johnson&#10;Alice Williams"></textarea>
+                </div>
+                
+                <button class="generate-btn" onclick="generateLinks()">Generate Links 🎅</button>
+                
+                <div id="linksContainer" class="links-container"></div>
+            </div>
         </div>
 
         <div id="errorMessage" class="error-message" style="display: none;"></div>
@@ -371,10 +537,190 @@
             giftBox.addEventListener('click', handleGiftClick);
         }
 
+        // Configuration
+        const MAX_ASSIGNMENT_ATTEMPTS = 100;
+
+        // Generate Secret Santa assignments
+        function generateSecretSantaAssignments(names) {
+            const assignments = {};
+            let receivers = [...names];
+            
+            // Keep trying until we get a valid derangement (no self-assignments)
+            let hasValidAssignment = false;
+            let attempts = 0;
+            
+            while (!hasValidAssignment && attempts < MAX_ASSIGNMENT_ATTEMPTS) {
+                attempts++;
+                hasValidAssignment = true;
+                
+                // Shuffle receivers using Fisher-Yates algorithm
+                receivers = [...names];
+                for (let i = receivers.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [receivers[i], receivers[j]] = [receivers[j], receivers[i]];
+                }
+                
+                // Check if any person got themselves
+                for (let i = 0; i < names.length; i++) {
+                    if (names[i] === receivers[i]) {
+                        hasValidAssignment = false;
+                        break;
+                    }
+                }
+            }
+            
+            // Create assignments mapping
+            for (let i = 0; i < names.length; i++) {
+                assignments[names[i]] = receivers[i];
+            }
+            
+            return assignments;
+        }
+
+        // Generate links for all participants
+        function generateLinks() {
+            const namesInput = document.getElementById('namesInput');
+            const linksContainer = document.getElementById('linksContainer');
+            const errorMessage = document.getElementById('errorMessage');
+            
+            // Clear previous error
+            errorMessage.style.display = 'none';
+            
+            // Get names from textarea
+            const inputText = namesInput.value.trim();
+            if (!inputText) {
+                errorMessage.textContent = '⚠️ Please enter at least 2 names!';
+                errorMessage.style.display = 'block';
+                return;
+            }
+            
+            // Split by newlines and filter empty lines
+            const names = inputText.split('\n')
+                .map(name => name.trim())
+                .filter(name => name.length > 0);
+            
+            // Validate minimum participants
+            if (names.length < 2) {
+                errorMessage.textContent = '⚠️ You need at least 2 participants for Secret Santa!';
+                errorMessage.style.display = 'block';
+                return;
+            }
+            
+            // Check for duplicate names
+            const uniqueNames = new Set(names);
+            if (uniqueNames.size !== names.length) {
+                errorMessage.textContent = '⚠️ Duplicate names found! Each participant must have a unique name.';
+                errorMessage.style.display = 'block';
+                return;
+            }
+            
+            // Generate assignments
+            const assignments = generateSecretSantaAssignments(names);
+            
+            // Create links HTML
+            const baseUrl = window.location.origin + window.location.pathname;
+            let linksHtml = '<h3>🎅 Secret Santa Links 🎄</h3>';
+            linksHtml += '<p style="color: #333; margin-bottom: 20px;">Copy and share each link with the respective person. They will see who they need to get a gift for!</p>';
+            
+            for (const [giver, receiver] of Object.entries(assignments)) {
+                const encodedReceiver = btoa(receiver);
+                const link = `${baseUrl}?name=${encodedReceiver}`;
+                const escapedGiver = escapeHtml(giver);
+                const escapedLink = escapeHtml(link);
+                
+                linksHtml += `
+                    <div class="link-item">
+                        <div class="link-item-name">🎁 ${escapedGiver}</div>
+                        <div class="link-item-url">
+                            <input type="text" class="link-input" value="${escapedLink}" readonly>
+                            <button class="copy-btn" onclick="copyLink(this, '${escapedLink}')">Copy</button>
+                        </div>
+                    </div>
+                `;
+            }
+            
+            linksContainer.innerHTML = linksHtml;
+            linksContainer.classList.add('show');
+        }
+
+        // Escape HTML to prevent XSS
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // Copy link to clipboard
+        function copyLink(button, link) {
+            // Check if clipboard API is available
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(link).then(() => {
+                    const originalText = button.textContent;
+                    button.textContent = '✓ Copied!';
+                    button.classList.add('copied');
+                    
+                    setTimeout(() => {
+                        button.textContent = originalText;
+                        button.classList.remove('copied');
+                    }, 2000);
+                }).catch(err => {
+                    console.error('Failed to copy:', err);
+                    // Fallback to text selection
+                    fallbackCopyToClipboard(button, link);
+                });
+            } else {
+                // Fallback for older browsers or non-HTTPS
+                fallbackCopyToClipboard(button, link);
+            }
+        }
+
+        // Fallback copy method using text selection
+        function fallbackCopyToClipboard(button, link) {
+            const linkItem = button.closest('.link-item');
+            const input = linkItem.querySelector('.link-input');
+            
+            try {
+                // Select the text in the input field
+                input.select();
+                input.setSelectionRange(0, 99999); // For mobile devices
+                
+                // Try to copy using execCommand
+                const successful = document.execCommand('copy');
+                
+                if (successful) {
+                    const originalText = button.textContent;
+                    button.textContent = '✓ Copied!';
+                    button.classList.add('copied');
+                    
+                    setTimeout(() => {
+                        button.textContent = originalText;
+                        button.classList.remove('copied');
+                    }, 2000);
+                } else {
+                    alert('Please manually copy the link from the text field.');
+                }
+            } catch (err) {
+                console.error('Fallback copy failed:', err);
+                alert('Please manually copy the link from the text field.');
+            }
+        }
+
         // Initialize on page load
         window.addEventListener('DOMContentLoaded', () => {
             startSnowfall();
-            revealSecretSanta();
+            
+            // Check if we have a name parameter
+            const urlParams = new URLSearchParams(window.location.search);
+            const hasNameParam = urlParams.has('name');
+            
+            if (hasNameParam) {
+                // Show reveal section
+                document.getElementById('revealSection').style.display = 'block';
+                revealSecretSanta();
+            } else {
+                // Show generator section
+                document.getElementById('generatorSection').style.display = 'block';
+            }
         });
 
         // Clean up on page unload
