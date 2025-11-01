@@ -445,13 +445,37 @@
     </div>
 
     <script>
+        // Snowflake configuration
+        const MAX_SNOWFLAKES = 50;
+        const FALL_SPEED_PX_PER_SEC = 100; // pixels per second - adjust for desired speed
+        
+        // Calculate duration based on viewport height
+        function calculateSnowflakeDuration() {
+            const viewportHeight = window.innerHeight;
+            // Duration in seconds = distance / speed
+            const baseDuration = viewportHeight / FALL_SPEED_PX_PER_SEC;
+            return {
+                min: baseDuration * 0.8,  // 20% faster than base
+                max: baseDuration * 1.2   // 20% slower than base
+            };
+        }
+        
+        // Calculate optimal interval to maintain MAX_SNOWFLAKES
+        function calculateSnowflakeInterval() {
+            const { min, max } = calculateSnowflakeDuration();
+            const avgDuration = (min + max) / 2;
+            // interval = avg_duration / max_snowflakes
+            return (avgDuration * 1000) / MAX_SNOWFLAKES;
+        }
+        
         // Create snowflakes
         function createSnowflake() {
+            const { min, max } = calculateSnowflakeDuration();
             const snowflake = document.createElement('div');
             snowflake.classList.add('snowflake');
             snowflake.textContent = '❄';
             snowflake.style.left = Math.random() * 100 + '%';
-            snowflake.style.animationDuration = (Math.random() * 3 + 5) + 's';
+            snowflake.style.animationDuration = (Math.random() * (max - min) + min) + 's';
             snowflake.style.fontSize = (Math.random() * 1 + 0.5) + 'em';
             snowflake.style.opacity = Math.random() * 0.6 + 0.4;
             document.body.appendChild(snowflake);
@@ -467,7 +491,8 @@
         
         function startSnowfall() {
             if (!snowflakeInterval) {
-                snowflakeInterval = setInterval(createSnowflake, 200);
+                const interval = calculateSnowflakeInterval();
+                snowflakeInterval = setInterval(createSnowflake, interval);
             }
         }
 
@@ -477,6 +502,16 @@
                 snowflakeInterval = null;
             }
         }
+        
+        // Restart snowfall on window resize to recalculate durations
+        let resizeTimeout;
+        window.addEventListener('resize', () => {
+            clearTimeout(resizeTimeout);
+            resizeTimeout = setTimeout(() => {
+                stopSnowfall();
+                startSnowfall();
+            }, 500);
+        });
 
         // Get name from URL parameter
         function getSecretSantaName() {
