@@ -539,34 +539,37 @@
 
         // Generate Secret Santa assignments
         function generateSecretSantaAssignments(names) {
-            // Create a copy of the names array for givers
-            const givers = [...names];
-            const receivers = [...names];
             const assignments = {};
+            let receivers = [...names];
             
-            // Shuffle receivers using Fisher-Yates algorithm
-            for (let i = receivers.length - 1; i > 0; i--) {
-                const j = Math.floor(Math.random() * (i + 1));
-                [receivers[i], receivers[j]] = [receivers[j], receivers[i]];
-            }
+            // Keep trying until we get a valid derangement (no self-assignments)
+            let hasValidAssignment = false;
+            let attempts = 0;
+            const maxAttempts = 100; // Prevent infinite loops
             
-            // Assign receivers to givers, ensuring no self-assignment
-            for (let i = 0; i < givers.length; i++) {
-                const giver = givers[i];
-                let receiver = receivers[i];
+            while (!hasValidAssignment && attempts < maxAttempts) {
+                attempts++;
+                hasValidAssignment = true;
                 
-                // If giver would get themselves, swap with next person
-                if (giver === receiver) {
-                    // If this is the last person, swap with the previous one
-                    if (i === givers.length - 1) {
-                        [receivers[i], receivers[i - 1]] = [receivers[i - 1], receivers[i]];
-                    } else {
-                        [receivers[i], receivers[i + 1]] = [receivers[i + 1], receivers[i]];
-                    }
-                    receiver = receivers[i];
+                // Shuffle receivers using Fisher-Yates algorithm
+                receivers = [...names];
+                for (let i = receivers.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [receivers[i], receivers[j]] = [receivers[j], receivers[i]];
                 }
                 
-                assignments[giver] = receiver;
+                // Check if any person got themselves
+                for (let i = 0; i < names.length; i++) {
+                    if (names[i] === receivers[i]) {
+                        hasValidAssignment = false;
+                        break;
+                    }
+                }
+            }
+            
+            // Create assignments mapping
+            for (let i = 0; i < names.length; i++) {
+                assignments[names[i]] = receivers[i];
             }
             
             return assignments;
@@ -620,13 +623,15 @@
             for (const [giver, receiver] of Object.entries(assignments)) {
                 const encodedReceiver = btoa(receiver);
                 const link = `${baseUrl}?name=${encodedReceiver}`;
+                const escapedGiver = escapeHtml(giver);
+                const escapedLink = escapeHtml(link);
                 
                 linksHtml += `
                     <div class="link-item">
-                        <div class="link-item-name">🎁 ${giver}</div>
+                        <div class="link-item-name">🎁 ${escapedGiver}</div>
                         <div class="link-item-url">
-                            <input type="text" class="link-input" value="${link}" readonly>
-                            <button class="copy-btn" onclick="copyLink(this, '${link}')">Copy</button>
+                            <input type="text" class="link-input" value="${escapedLink}" readonly>
+                            <button class="copy-btn" onclick="copyLink(this, '${escapedLink}')">Copy</button>
                         </div>
                     </div>
                 `;
@@ -634,6 +639,13 @@
             
             linksContainer.innerHTML = linksHtml;
             linksContainer.classList.add('show');
+        }
+
+        // Escape HTML to prevent XSS
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
         }
 
         // Copy link to clipboard
