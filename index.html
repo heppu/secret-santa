@@ -89,44 +89,84 @@
 
         .bow {
             position: absolute;
-            top: -30px;
+            top: -40px;
             left: 50%;
             transform: translateX(-50%);
-            width: 80px;
+            width: 100px;
             height: 80px;
         }
 
-        .bow::before,
+        /* Left bow loop */
+        .bow::before {
+            content: '';
+            position: absolute;
+            width: 35px;
+            height: 45px;
+            background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
+            border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+            top: 15px;
+            left: -5px;
+            transform: rotate(-40deg);
+            box-shadow: inset -2px -2px 5px rgba(0, 0, 0, 0.2), 
+                        2px 2px 8px rgba(0, 0, 0, 0.3);
+        }
+
+        /* Right bow loop */
         .bow::after {
             content: '';
             position: absolute;
-            width: 40px;
-            height: 40px;
-            background: #FFD700;
-            border-radius: 50%;
-            top: 20px;
+            width: 35px;
+            height: 45px;
+            background: linear-gradient(135deg, #FFA500 0%, #FFD700 100%);
+            border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+            top: 15px;
+            right: -5px;
+            transform: rotate(40deg);
+            box-shadow: inset 2px -2px 5px rgba(0, 0, 0, 0.2), 
+                        -2px 2px 8px rgba(0, 0, 0, 0.3);
         }
 
-        .bow::before {
-            left: -15px;
-            transform: rotate(-30deg);
-        }
-
-        .bow::after {
-            right: -15px;
-            transform: rotate(30deg);
-        }
-
+        /* Center knot */
         .bow-center {
             position: absolute;
-            width: 20px;
-            height: 20px;
-            background: #FFD700;
+            width: 22px;
+            height: 28px;
+            background: linear-gradient(180deg, #FFD700 0%, #FFA500 100%);
             border-radius: 50%;
-            top: 30px;
+            top: 20px;
             left: 50%;
             transform: translateX(-50%);
-            box-shadow: 0 0 20px rgba(255, 215, 0, 0.8);
+            box-shadow: 0 0 15px rgba(255, 215, 0, 0.8),
+                        inset 0 -2px 5px rgba(0, 0, 0, 0.2);
+            z-index: 2;
+        }
+
+        /* Ribbon tails */
+        .bow-center::before,
+        .bow-center::after {
+            content: '';
+            position: absolute;
+            width: 12px;
+            height: 35px;
+            background: linear-gradient(180deg, #FFD700 0%, #FFA500 100%);
+            top: 25px;
+            box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.3);
+        }
+
+        /* Left ribbon tail */
+        .bow-center::before {
+            left: -8px;
+            transform: rotate(-15deg);
+            clip-path: polygon(0 0, 100% 0, 50% 100%);
+            border-radius: 2px 2px 0 0;
+        }
+
+        /* Right ribbon tail */
+        .bow-center::after {
+            right: -8px;
+            transform: rotate(15deg);
+            clip-path: polygon(0 0, 100% 0, 50% 100%);
+            border-radius: 2px 2px 0 0;
         }
 
         .gift-box.opening {
