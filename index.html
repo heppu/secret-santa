@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Secret Santa 🎅</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Georgia', serif;
+            background: linear-gradient(135deg, #0f2027 0%, #203a43 50%, #2c5364 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .container {
+            text-align: center;
+            z-index: 10;
+            position: relative;
+            padding: 20px;
+            max-width: 800px;
+        }
+
+        .gift-box {
+            width: 200px;
+            height: 200px;
+            margin: 0 auto 40px;
+            position: relative;
+            animation: float 3s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% {
+                transform: translateY(0px);
+            }
+            50% {
+                transform: translateY(-20px);
+            }
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: rotate(0deg); }
+            25% { transform: rotate(-5deg); }
+            75% { transform: rotate(5deg); }
+        }
+
+        .gift {
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #c41e3a 0%, #8b0000 100%);
+            position: relative;
+            border-radius: 10px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+            animation: shake 0.5s ease-in-out;
+            cursor: pointer;
+        }
+
+        .gift::before,
+        .gift::after {
+            content: '';
+            position: absolute;
+            background: #FFD700;
+        }
+
+        .gift::before {
+            width: 30px;
+            height: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            box-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+        }
+
+        .gift::after {
+            width: 100%;
+            height: 30px;
+            top: 50%;
+            transform: translateY(-50%);
+            box-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+        }
+
+        .bow {
+            position: absolute;
+            top: -30px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80px;
+            height: 80px;
+        }
+
+        .bow::before,
+        .bow::after {
+            content: '';
+            position: absolute;
+            width: 40px;
+            height: 40px;
+            background: #FFD700;
+            border-radius: 50%;
+            top: 20px;
+        }
+
+        .bow::before {
+            left: -15px;
+            transform: rotate(-30deg);
+        }
+
+        .bow::after {
+            right: -15px;
+            transform: rotate(30deg);
+        }
+
+        .bow-center {
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            background: #FFD700;
+            border-radius: 50%;
+            top: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            box-shadow: 0 0 20px rgba(255, 215, 0, 0.8);
+        }
+
+        .gift-box.opening {
+            animation: none;
+            transition: all 0.8s ease-out;
+            transform: scale(0) rotate(180deg);
+            opacity: 0;
+        }
+
+        .title {
+            font-size: 3.5em;
+            color: #FFD700;
+            text-shadow: 3px 3px 6px rgba(0, 0, 0, 0.5);
+            margin-bottom: 30px;
+            animation: glow 2s ease-in-out infinite;
+        }
+
+        @keyframes glow {
+            0%, 100% {
+                text-shadow: 3px 3px 6px rgba(0, 0, 0, 0.5), 0 0 20px rgba(255, 215, 0, 0.5);
+            }
+            50% {
+                text-shadow: 3px 3px 6px rgba(0, 0, 0, 0.5), 0 0 40px rgba(255, 215, 0, 0.8);
+            }
+        }
+
+        .subtitle {
+            font-size: 1.5em;
+            color: #fff;
+            margin-bottom: 20px;
+            opacity: 0;
+            animation: fadeIn 1s ease-in 0.5s forwards;
+        }
+
+        @keyframes fadeIn {
+            to {
+                opacity: 1;
+            }
+        }
+
+        .reveal-container {
+            opacity: 0;
+            transform: scale(0);
+            transition: all 1s ease-out;
+        }
+
+        .reveal-container.show {
+            opacity: 1;
+            transform: scale(1);
+        }
+
+        .santa-name {
+            font-size: 4em;
+            color: #c41e3a;
+            background: white;
+            padding: 30px 50px;
+            border-radius: 20px;
+            display: inline-block;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
+            margin-top: 30px;
+            font-weight: bold;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+            border: 5px solid #FFD700;
+        }
+
+        .message {
+            color: #fff;
+            font-size: 1.3em;
+            margin-top: 30px;
+            opacity: 0;
+            animation: fadeIn 1s ease-in 2s forwards;
+        }
+
+        /* Snowflakes */
+        .snowflake {
+            position: absolute;
+            top: -10px;
+            color: #fff;
+            font-size: 1em;
+            user-select: none;
+            pointer-events: none;
+            animation: fall linear infinite;
+            opacity: 0.8;
+        }
+
+        @keyframes fall {
+            to {
+                transform: translateY(100vh) rotate(360deg);
+            }
+        }
+
+        .error-message {
+            color: #ff6b6b;
+            font-size: 1.5em;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 20px;
+        }
+
+        @media (max-width: 768px) {
+            .title {
+                font-size: 2.5em;
+            }
+            .santa-name {
+                font-size: 2.5em;
+                padding: 20px 30px;
+            }
+            .gift-box {
+                width: 150px;
+                height: 150px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="title">🎄 Secret Santa 🎅</h1>
+        
+        <div id="giftBox" class="gift-box">
+            <div class="gift">
+                <div class="bow">
+                    <div class="bow-center"></div>
+                </div>
+            </div>
+        </div>
+
+        <p class="subtitle">Click the gift to reveal your Secret Santa! 🎁</p>
+
+        <div id="revealContainer" class="reveal-container">
+            <div class="santa-name" id="santaName"></div>
+            <p class="message">🎉 Time to get shopping! 🎉</p>
+        </div>
+
+        <div id="errorMessage" class="error-message" style="display: none;"></div>
+    </div>
+
+    <script>
+        // Create snowflakes
+        function createSnowflake() {
+            const snowflake = document.createElement('div');
+            snowflake.classList.add('snowflake');
+            snowflake.textContent = '❄';
+            snowflake.style.left = Math.random() * 100 + '%';
+            snowflake.style.animationDuration = (Math.random() * 3 + 5) + 's';
+            snowflake.style.fontSize = (Math.random() * 1 + 0.5) + 'em';
+            snowflake.style.opacity = Math.random() * 0.6 + 0.4;
+            document.body.appendChild(snowflake);
+
+            // Remove snowflake after animation completes using animationend event
+            snowflake.addEventListener('animationend', () => {
+                snowflake.remove();
+            });
+        }
+
+        // Create snowflakes continuously
+        let snowflakeInterval;
+        
+        function startSnowfall() {
+            if (!snowflakeInterval) {
+                snowflakeInterval = setInterval(createSnowflake, 200);
+            }
+        }
+
+        function stopSnowfall() {
+            if (snowflakeInterval) {
+                clearInterval(snowflakeInterval);
+                snowflakeInterval = null;
+            }
+        }
+
+        // Get name from URL parameter
+        function getSecretSantaName() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const encodedName = urlParams.get('name');
+            
+            if (!encodedName) {
+                return null;
+            }
+
+            try {
+                // Decode base64
+                const decodedName = atob(encodedName);
+                
+                // Validate the decoded name
+                // Check length (max 100 characters for reasonable names)
+                if (decodedName.length === 0 || decodedName.length > 100) {
+                    console.error('Invalid name length');
+                    return null;
+                }
+                
+                // Trim whitespace
+                const trimmedName = decodedName.trim();
+                if (trimmedName.length === 0) {
+                    console.error('Name is empty after trimming');
+                    return null;
+                }
+                
+                return trimmedName;
+            } catch (e) {
+                console.error('Error decoding name:', e);
+                return null;
+            }
+        }
+
+        // Reveal animation
+        let isInitialized = false;
+        
+        function revealSecretSanta() {
+            if (isInitialized) return;
+            isInitialized = true;
+
+            const name = getSecretSantaName();
+            const giftBox = document.getElementById('giftBox');
+            const revealContainer = document.getElementById('revealContainer');
+            const santaName = document.getElementById('santaName');
+            const errorMessage = document.getElementById('errorMessage');
+
+            if (!name) {
+                errorMessage.textContent = '⚠️ No Secret Santa name found! Please use a valid link with ?name=<base64-encoded-name>';
+                errorMessage.style.display = 'block';
+                return;
+            }
+
+            santaName.textContent = name;
+
+            // Gift box click handler
+            function handleGiftClick() {
+                // Animate gift box away
+                giftBox.classList.add('opening');
+
+                // Show the reveal after gift disappears
+                setTimeout(() => {
+                    giftBox.style.display = 'none';
+                    revealContainer.classList.add('show');
+                }, 800);
+
+                // Remove the event listener after first click
+                giftBox.removeEventListener('click', handleGiftClick);
+            }
+
+            giftBox.addEventListener('click', handleGiftClick);
+        }
+
+        // Initialize on page load
+        window.addEventListener('DOMContentLoaded', () => {
+            startSnowfall();
+            revealSecretSanta();
+        });
+
+        // Clean up on page unload
+        window.addEventListener('beforeunload', stopSnowfall);
+    </script>
+</body>
+</html>
