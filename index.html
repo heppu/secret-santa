@@ -47,6 +47,12 @@
             }
         }
 
+        @keyframes shake {
+            0%, 100% { transform: rotate(0deg); }
+            25% { transform: rotate(-5deg); }
+            75% { transform: rotate(5deg); }
+        }
+
         .gift {
             width: 100%;
             height: 100%;
@@ -123,10 +129,11 @@
             box-shadow: 0 0 20px rgba(255, 215, 0, 0.8);
         }
 
-        @keyframes shake {
-            0%, 100% { transform: rotate(0deg); }
-            25% { transform: rotate(-5deg); }
-            75% { transform: rotate(5deg); }
+        .gift-box.opening {
+            animation: none;
+            transition: all 0.8s ease-out;
+            transform: scale(0) rotate(180deg);
+            opacity: 0;
         }
 
         .title {
@@ -316,10 +323,7 @@
             // Gift box click handler
             giftBox.addEventListener('click', () => {
                 // Animate gift box away
-                giftBox.style.animation = 'none';
-                giftBox.style.transition = 'all 0.8s ease-out';
-                giftBox.style.transform = 'scale(0) rotate(180deg)';
-                giftBox.style.opacity = '0';
+                giftBox.classList.add('opening');
 
                 // Show the reveal after gift disappears
                 setTimeout(() => {
