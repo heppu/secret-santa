@@ -310,7 +310,22 @@
             try {
                 // Decode base64
                 const decodedName = atob(encodedName);
-                return decodedName;
+                
+                // Validate the decoded name
+                // Check length (max 100 characters for reasonable names)
+                if (decodedName.length === 0 || decodedName.length > 100) {
+                    console.error('Invalid name length');
+                    return null;
+                }
+                
+                // Trim whitespace
+                const trimmedName = decodedName.trim();
+                if (trimmedName.length === 0) {
+                    console.error('Name is empty after trimming');
+                    return null;
+                }
+                
+                return trimmedName;
             } catch (e) {
                 console.error('Error decoding name:', e);
                 return null;
