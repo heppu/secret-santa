@@ -537,6 +537,9 @@
             giftBox.addEventListener('click', handleGiftClick);
         }
 
+        // Configuration
+        const MAX_ASSIGNMENT_ATTEMPTS = 100;
+
         // Generate Secret Santa assignments
         function generateSecretSantaAssignments(names) {
             const assignments = {};
@@ -545,9 +548,8 @@
             // Keep trying until we get a valid derangement (no self-assignments)
             let hasValidAssignment = false;
             let attempts = 0;
-            const maxAttempts = 100; // Prevent infinite loops
             
-            while (!hasValidAssignment && attempts < maxAttempts) {
+            while (!hasValidAssignment && attempts < MAX_ASSIGNMENT_ATTEMPTS) {
                 attempts++;
                 hasValidAssignment = true;
                 
@@ -650,19 +652,57 @@
 
         // Copy link to clipboard
         function copyLink(button, link) {
-            navigator.clipboard.writeText(link).then(() => {
-                const originalText = button.textContent;
-                button.textContent = '✓ Copied!';
-                button.classList.add('copied');
+            // Check if clipboard API is available
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(link).then(() => {
+                    const originalText = button.textContent;
+                    button.textContent = '✓ Copied!';
+                    button.classList.add('copied');
+                    
+                    setTimeout(() => {
+                        button.textContent = originalText;
+                        button.classList.remove('copied');
+                    }, 2000);
+                }).catch(err => {
+                    console.error('Failed to copy:', err);
+                    // Fallback to text selection
+                    fallbackCopyToClipboard(button, link);
+                });
+            } else {
+                // Fallback for older browsers or non-HTTPS
+                fallbackCopyToClipboard(button, link);
+            }
+        }
+
+        // Fallback copy method using text selection
+        function fallbackCopyToClipboard(button, link) {
+            const linkItem = button.closest('.link-item');
+            const input = linkItem.querySelector('.link-input');
+            
+            try {
+                // Select the text in the input field
+                input.select();
+                input.setSelectionRange(0, 99999); // For mobile devices
                 
-                setTimeout(() => {
-                    button.textContent = originalText;
-                    button.classList.remove('copied');
-                }, 2000);
-            }).catch(err => {
-                console.error('Failed to copy:', err);
-                alert('Failed to copy link. Please copy it manually.');
-            });
+                // Try to copy using execCommand
+                const successful = document.execCommand('copy');
+                
+                if (successful) {
+                    const originalText = button.textContent;
+                    button.textContent = '✓ Copied!';
+                    button.classList.add('copied');
+                    
+                    setTimeout(() => {
+                        button.textContent = originalText;
+                        button.classList.remove('copied');
+                    }, 2000);
+                } else {
+                    alert('Please manually copy the link from the text field.');
+                }
+            } catch (err) {
+                console.error('Fallback copy failed:', err);
+                alert('Please manually copy the link from the text field.');
+            }
         }
 
         // Initialize on page load
