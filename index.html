@@ -276,14 +276,27 @@
             snowflake.style.opacity = Math.random() * 0.6 + 0.4;
             document.body.appendChild(snowflake);
 
-            // Remove snowflake after animation completes
-            setTimeout(() => {
+            // Remove snowflake after animation completes using animationend event
+            snowflake.addEventListener('animationend', () => {
                 snowflake.remove();
-            }, parseFloat(snowflake.style.animationDuration) * 1000);
+            });
         }
 
         // Create snowflakes continuously
-        setInterval(createSnowflake, 200);
+        let snowflakeInterval;
+        
+        function startSnowfall() {
+            if (!snowflakeInterval) {
+                snowflakeInterval = setInterval(createSnowflake, 200);
+            }
+        }
+
+        function stopSnowfall() {
+            if (snowflakeInterval) {
+                clearInterval(snowflakeInterval);
+                snowflakeInterval = null;
+            }
+        }
 
         // Get name from URL parameter
         function getSecretSantaName() {
@@ -305,7 +318,12 @@
         }
 
         // Reveal animation
+        let isInitialized = false;
+        
         function revealSecretSanta() {
+            if (isInitialized) return;
+            isInitialized = true;
+
             const name = getSecretSantaName();
             const giftBox = document.getElementById('giftBox');
             const revealContainer = document.getElementById('revealContainer');
@@ -321,7 +339,7 @@
             santaName.textContent = name;
 
             // Gift box click handler
-            giftBox.addEventListener('click', () => {
+            function handleGiftClick() {
                 // Animate gift box away
                 giftBox.classList.add('opening');
 
@@ -330,11 +348,22 @@
                     giftBox.style.display = 'none';
                     revealContainer.classList.add('show');
                 }, 800);
-            });
+
+                // Remove the event listener after first click
+                giftBox.removeEventListener('click', handleGiftClick);
+            }
+
+            giftBox.addEventListener('click', handleGiftClick);
         }
 
         // Initialize on page load
-        window.addEventListener('DOMContentLoaded', revealSecretSanta);
+        window.addEventListener('DOMContentLoaded', () => {
+            startSnowfall();
+            revealSecretSanta();
+        });
+
+        // Clean up on page unload
+        window.addEventListener('beforeunload', stopSnowfall);
     </script>
 </body>
 </html>
